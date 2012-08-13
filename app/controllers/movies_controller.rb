@@ -7,12 +7,20 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings = Movie.all_ratings
+    if (@checked_ratings.nil?)
+      @checked_ratings=[]
+    end
+    if (params[:ratings]) then
+      @checked_ratings=params[:ratings].keys
+    end
+    Movie.scope_by_ratings(@checked_ratings)
     if (params[:sortby] =~ /title|release_date/ ) then
       @sortby = params[:sortby]
-      @movies = Movie.order(params[:sortby])
+      @movies = Movie.byrating.order(params[:sortby])
     else
       @sortby = ""
-      @movies = Movie.all
+      @movies = Movie.byrating.all
     end
   end
 
