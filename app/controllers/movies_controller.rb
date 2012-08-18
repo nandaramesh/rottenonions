@@ -11,27 +11,33 @@ class MoviesController < ApplicationController
     if (@checked_ratings.nil?)
       @checked_ratings=[]
     end
-    if (params[:ratings]) then
-      @checked_ratings=params[:ratings].keys
-      session[:checked_ratings]=@checked_ratings
-    elsif (session[:checked_ratings]) then
-      @checked_ratings=session[:checked_ratings]
-    end
-    Movie.scope_by_ratings(@checked_ratings)
     if (params[:sortby] =~ /title|release_date/ ) then
       @sortby = params[:sortby]
       session[:sortby] = @sortby
     elsif (session[:sortby]) then
       @sortby = session[:sortby]
+      session.delete(:sortby)
     else
       @sortby = ""
     end
+    if (params[:ratings]) then
+      @checked_ratings=params[:ratings].keys
+      session[:checked_ratings]=params[:ratings]
+    elsif (session[:checked_ratings]) then
+      @checked_ratings=session[:checked_ratings]
+      session.delete(:checked_ratings)
+      if(@sortby) then
+        redirect_to movies_path(:sortby=>@sortby, :ratings=>@checked_ratings)
+      else
+        redirect_to movies_path(:ratings=>@checked_ratings)
+      end
+    end
+    Movie.scope_by_ratings(@checked_ratings)
     if (@sortby) then
       @movies = Movie.byrating.order(@sortby)
     else
       @movies = Movie.byrating.all
     end
-# render :text => "***PARAMS*** #{params.inspect} ***SESSION*** #{session.inspect}"
   end
 
   def new
