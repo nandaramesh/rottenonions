@@ -14,7 +14,7 @@ class MoviesController < ApplicationController
     if (params[:ratings]) then
       @checked_ratings=params[:ratings].keys
       session[:ratings]=params[:ratings]
-    elsif (session[:ratings]) then
+    elsif (session[:ratings] and !params[:commit]) then
       @ratings=session[:ratings]
       session.delete(:ratings)
       redirect=true
@@ -28,6 +28,7 @@ class MoviesController < ApplicationController
       redirect=true
     end
     if redirect
+      flash.keep
       redirect_to movies_path(:sortby=>@sortby, :ratings=>@ratings)
     end
     Movie.scope_by_ratings(@checked_ratings)
